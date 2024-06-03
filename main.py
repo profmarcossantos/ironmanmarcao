@@ -1,5 +1,6 @@
 import pygame
 import random
+import os
 pygame.init()
 tamanho = (800,600)
 relogio = pygame.time.Clock()
@@ -23,6 +24,11 @@ fonte = pygame.font.SysFont("comicsans",28)
 pygame.mixer.music.load("assets/ironsound.mp3")
 pygame.mixer.music.play(-1)
 pontos = 0
+larguraPersona = 250
+alturaPersona = 127
+larguaMissel  = 50
+alturaMissel  = 250
+dificuldade  = 0
 while True:
     for evento in pygame.event.get():
         if evento.type == pygame.QUIT:
@@ -76,6 +82,22 @@ while True:
     
     texto = fonte.render("Pontos: "+str(pontos), True, branco)
     tela.blit(texto, (10,10))
+    
+    pixelsPersonaX = list(range(posicaoXPersona, posicaoXPersona+larguraPersona))
+    pixelsPersonaY = list(range(posicaoYPersona, posicaoYPersona+alturaPersona))
+    pixelsMisselX = list(range(posicaoXMissel, posicaoXMissel + larguaMissel))
+    pixelsMisselY = list(range(posicaoYMissel, posicaoYMissel + alturaMissel))
+    
+    os.system("cls")
+    print( len( list( set(pixelsMisselX).intersection(set(pixelsPersonaX))   ) )   )
+    if  len( list( set(pixelsMisselY).intersection(set(pixelsPersonaY))) ) > dificuldade:
+        if len( list( set(pixelsMisselX).intersection(set(pixelsPersonaX))   ) )  > dificuldade:
+            print("Morreuuuuu")
+        else:
+            print("Ainda Vivo, mas por pouco!")
+    else:
+        print("Ainda Vivo")
+    
     
    
     
