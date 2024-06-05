@@ -1,6 +1,8 @@
 import pygame
 import random
 import os
+from tkinter import simpledialog
+
 pygame.init()
 
 relogio = pygame.time.Clock()
@@ -25,7 +27,8 @@ pygame.mixer.music.load("assets/ironsound.mp3")
 branco = (255,255,255)
 preto = (0, 0 ,0 )
 
-def jogar():
+
+def jogar(nome):
     pygame.mixer.Sound.play(missileSound)
     pygame.mixer.music.play(-1)
     posicaoXPersona = 400
@@ -93,7 +96,7 @@ def jogar():
             
         tela.blit( missel, (posicaoXMissel, posicaoYMissel) )
         
-        texto = fonte.render("Pontos: "+str(pontos), True, branco)
+        texto = fonte.render(nome+"- Pontos: "+str(pontos), True, branco)
         tela.blit(texto, (10,10))
         
         pixelsPersonaX = list(range(posicaoXPersona, posicaoXPersona+larguraPersona))
@@ -104,7 +107,7 @@ def jogar():
         #print( len( list( set(pixelsMisselX).intersection(set(pixelsPersonaX))   ) )   )
         if  len( list( set(pixelsMisselY).intersection(set(pixelsPersonaY))) ) > dificuldade:
             if len( list( set(pixelsMisselX).intersection(set(pixelsPersonaX))   ) )  > dificuldade:
-                dead()
+                dead(nome, pontos)
         
     
         
@@ -112,20 +115,34 @@ def jogar():
         relogio.tick(60)
 
 
-def dead():
+def dead(nome, pontos):
     pygame.mixer.music.stop()
     pygame.mixer.Sound.play(explosaoSound)
+    
+    jogadas  = {}
+    try:
+        arquivo = open("historico.txt","r",encoding="utf-8")
+        jogadas = eval(arquivo.read())
+        arquivo.close()
+    except:
+        arquivo = open("historico.txt","w",encoding="utf-8")
+        arquivo.close()
+ 
+    jogadas[nome] = pontos   
+    arquivo = open("historico.txt","w",encoding="utf-8") 
+    arquivo.write(str(jogadas))
+    arquivo.close()
+    
     while True:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 quit()
             elif evento.type == pygame.KEYDOWN and evento.key == pygame.K_RETURN:
-                jogar()
+                jogar(nome)
 
             elif evento.type == pygame.MOUSEBUTTONDOWN:
                 if buttonStart.collidepoint(evento.pos):
-                    jogar()
-
+                    jogar(nome)
         tela.fill(branco)
         tela.blit(fundoDead, (0,0))
         buttonStart = pygame.draw.rect(tela, preto, (35,482,750,100),0)
@@ -133,24 +150,70 @@ def dead():
         tela.blit(textoStart, (400,482))
         textoEnter = fonte.render("Press enter to continue...", True, branco)
         tela.blit(textoEnter, (60,482))
-      
-        
         pygame.display.update()
         relogio.tick(60)
 
 
-def start():
+def ranking():
+    estrelas = {}
+    try:
+        arquivo = open("historico.txt","r",encoding="utf-8" )
+        estrelas = eval(arquivo.read())
+        arquivo.close()
+    except:
+        pass
+    
+    nomes = sorted(estrelas, key=estrelas.get,reverse=True)
+    print(estrelas)
     while True:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 quit()
             elif evento.type == pygame.MOUSEBUTTONDOWN:
                 if buttonStart.collidepoint(evento.pos):
-                    jogar()
+                    start()
+
+        tela.fill(preto)
+        buttonStart = pygame.draw.rect(tela, preto, (35,482,750,100),0)
+        textoStart = fonteStart.render("BACK TO START", True, branco)
+        tela.blit(textoStart, (330,482))
+        
+        
+        posicaoY = 50
+        for key,nome in enumerate(nomes):
+            if key == 13:
+                break
+            textoJogador = fonte.render(nome + " - "+str(estrelas[nome]), True, branco)
+            tela.blit(textoJogador, (300,posicaoY))
+            posicaoY = posicaoY + 30
+
+            
+        
+        pygame.display.update()
+        relogio.tick(60)
+
+
+def start():
+    nome = simpledialog.askstring("Iron Man","Nome Completo:")
+    
+    
+    
+    while True:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                quit()
+            elif evento.type == pygame.MOUSEBUTTONDOWN:
+                if buttonStart.collidepoint(evento.pos):
+                    jogar(nome)
+                elif buttonRanking.collidepoint(evento.pos):
+                    ranking()
 
         tela.fill(branco)
         tela.blit(fundoStart, (0,0))
         buttonStart = pygame.draw.rect(tela, preto, (35,482,750,100),0)
+        buttonRanking = pygame.draw.rect(tela, preto, (35,50,200,50),0,30)
+        textoRanking = fonte.render("Ranking", True, branco)
+        tela.blit(textoRanking, (90,50))
         textoStart = fonteStart.render("START", True, branco)
         tela.blit(textoStart, (330,482))
 
